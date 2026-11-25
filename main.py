@@ -27,6 +27,17 @@ def resolve_output_path():
     return os.path.join("/output", "entry.txt")
 
 
+def verify_written(path):
+    """Read the entry back and confirm it matches ENTRY exactly."""
+    with open(path, "r", encoding="utf-8") as handle:
+        written = handle.read()
+    if written != ENTRY or not 1 <= len(written) <= 200:
+        raise SystemExit(
+            "verification failed: entry.txt content mismatch "
+            "(len=%d)" % len(written)
+        )
+
+
 def main():
     path = resolve_output_path()
     try:
@@ -36,6 +47,7 @@ def main():
         with open(path, "w", encoding="utf-8") as handle:
             handle.write(ENTRY)
         os.chmod(path, 0o644)
+        verify_written(path)
     except OSError:
         # /output is not writable here: fall back to this script's own
         # directory so the entry is still produced deterministically.
@@ -45,6 +57,7 @@ def main():
         with open(fallback, "w", encoding="utf-8") as handle:
             handle.write(ENTRY)
         os.chmod(fallback, 0o644)
+        verify_written(fallback)
 
 
 if __name__ == "__main__":
